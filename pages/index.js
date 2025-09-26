@@ -32,11 +32,10 @@ export default function Home() {
 
   // --- PERUBAHAN 2: Definisikan gambar untuk carousel ---
   const carouselImages = [
-    "/images/CAR1.png",
-    "/images/CAR2.png",
-    "/images/CAR3.png",
+    "/images/DASH2.png",
+    "/images/DASH3.png",
+    "/images/DASH1.png",
   ];
-  // ----------------------------------------------------
 
   useEffect(() => {
     const handleScroll = () => {
