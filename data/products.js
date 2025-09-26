@@ -5,8 +5,7 @@ export const dummyProducts = [
     category: "Drinks",
     price: 5000,
     description: "Fresh and pure mountain spring water.",
-    image:
-      "https://via.placeholder.com/150?text=Orange+Juice",
+    image: "/images/aqua.png", // Diperbarui
   },
   {
     id: 2,
@@ -14,8 +13,7 @@ export const dummyProducts = [
     category: "Drinks",
     price: 15000,
     description: "A strong brew of iced coffee to start your day.",
-    image:
-      "https://via.placeholder.com/150?text=Orange+Juice",
+    image: "/images/kopimase.png", // Diperbarui
   },
   {
     id: 3,
@@ -23,8 +21,7 @@ export const dummyProducts = [
     category: "Snacks",
     price: 8000,
     description: "Crispy and savory potato chips.",
-    image:
-      "https://via.placeholder.com/150?text=Orange+Juice",
+    image: "/images/chips.png", // Diperbarui
   },
   {
     id: 4,
@@ -32,7 +29,7 @@ export const dummyProducts = [
     category: "Snacks",
     price: 12000,
     description: "Rich and decadent chocolate bar.",
-    image: "https://via.placeholder.com/150?text=Chocolate+Bar",
+    image: "/images/chocolate.png", // Diperbarui
   },
   {
     id: 5,
@@ -40,16 +37,15 @@ export const dummyProducts = [
     category: "Bundles",
     price: 25000,
     description: "A complete bundle of joy for your movie night.",
-    image: "https://via.placeholder.com/150?text=Snack+Bundle",
+    image: "/images/snacks.png", // Diperbarui
   },
-  // --- Produk Baru Ditambahkan Di Sini ---
   {
     id: 6,
     name: "Orange Juice",
     category: "Drinks",
     price: 12000,
     description: "Freshly squeezed orange juice, full of vitamins.",
-    image: "https://via.placeholder.com/150?text=Orange+Juice",
+    image: "/images/orange.png", // Diperbarui
   },
   {
     id: 7,
@@ -57,7 +53,7 @@ export const dummyProducts = [
     category: "Drinks",
     price: 10000,
     description: "A calming and refreshing cup of green tea.",
-    image: "https://via.placeholder.com/150?text=Green+Tea",
+    image: "/images/greentea.png", // Diperbarui
   },
   {
     id: 8,
@@ -65,7 +61,7 @@ export const dummyProducts = [
     category: "Snacks",
     price: 18000,
     description: "Roasted and lightly salted cashew nuts.",
-    image: "https://via.placeholder.com/150?text=Cashew+Nuts",
+    image: "/images/cashewnut.png", // Diperbarui
   },
   {
     id: 9,
@@ -73,7 +69,7 @@ export const dummyProducts = [
     category: "Snacks",
     price: 9000,
     description: "Classic buttered popcorn for any occasion.",
-    image: "https://via.placeholder.com/150?text=Popcorn",
+    image: "/images/popcorn.png", // Diperbarui
   },
   {
     id: 10,
@@ -81,7 +77,7 @@ export const dummyProducts = [
     category: "Bundles",
     price: 35000,
     description: "A mix of nuts, dried fruits, and green tea.",
-    image: "https://via.placeholder.com/150?text=Healthy+Bundle",
+    image: "/images/healthysnack.png", // Diperbarui
   },
   {
     id: 11,
@@ -89,6 +85,6 @@ export const dummyProducts = [
     category: "Bundles",
     price: 40000,
     description: "Iced coffee and a croissant to kickstart your morning.",
-    image: "https://via.placeholder.com/150?text=Breakfast+Bundle",
+    image: "/images/breakfast.png", // Diperbarui
   },
 ];

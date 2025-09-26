@@ -1,9 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image"; 
+import Image from "next/image";
 import { useState } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import { dummyProducts } from "../products";
+import { dummyProducts } from "../data/products";
 import { useCart } from "../context/CartContext";
 
 const geistSans = Geist({
@@ -70,7 +70,6 @@ export default function Home() {
           </div>
 
           <nav className="flex flex-wrap gap-2 mb-6">
-            {/* Navigasi filter */}
             <button
               onClick={() => setFilter("All")}
               className={`px-4 py-2 text-sm text-gray-400 rounded-full ${
@@ -111,9 +110,8 @@ export default function Home() {
                 key={product.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
               >
-                
-                {/* BAGIAN GAMBAR SUDAH DINONAKTIFKAN SEMENTARA */}
-                {/* <div className="relative w-full h-48">
+                {/* GAMBAR SEKARANG SUDAH AKTIF KEMBALI */}
+                <div className="relative w-full h-48">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -121,7 +119,6 @@ export default function Home() {
                     objectFit="cover"
                   />
                 </div>
-                */}
 
                 <div className="p-4 flex flex-col flex-grow">
                   <h3 className="text-lg text-gray-700 font-semibold">
