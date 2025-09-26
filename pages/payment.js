@@ -1,126 +1,133 @@
+// pages/payment.js
+
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
-//test
 
 export default function PaymentPage() {
   const { cartItems } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
+  const [isLoading, setIsLoading] = useState(false);
 
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
-  const shipping = 10000;
-  const total = subtotal + shipping;
+  const tax = subtotal * 0.11;
+  const total = subtotal + tax;
 
-  const handleConfirmAndPay = () => {
-    alert(
-      `Payment process started with ${paymentMethod}. Total: Rp ${total.toLocaleString(
-        "id-ID"
-      )}`
-    );
+  const handleConfirmAndPay = async () => {
+    if (cartItems.length === 0) {
+      alert("Keranjang Anda kosong!");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const orderDetails = {
+      items: cartItems.map((item) => ({
+        productId: item._id || item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      totalAmount: Math.round(total),
+    };
+
+    try {
+      const response = await fetch("/api/create-invoice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderDetails),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        window.location.href = result.invoice_url;
+      } else {
+        alert(`Error: ${result.message}`);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Gagal memproses pembayaran:", error);
+      alert("Terjadi kesalahan pada sistem. Silakan coba lagi.");
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="min-h-screen">
       <div className="container mx-auto max-w-full">
         <Head>
-          <title>Secure Checkout</title>
+          <title>Secure Payment - Cinema 22</title>
         </Head>
 
-        <header className="bg-white shadow-sm flex items-center justify-between p-4 border-b">
+        <header className="bg-gray-900/80 backdrop-blur-sm shadow-lg flex items-center justify-between p-4 border-b border-gray-700 sticky top-0 z-10">
           <Link
             href="/checkout"
-            className="text-blue-600 font-semibold hover:underline"
+            className="text-teal-400 font-semibold hover:text-teal-300 transition"
           >
-            &lt; Back
+            &lt; Back to Checkout
           </Link>
-          <h1 className="text-xl text-blue-600 font-bold">Secure Checkout</h1>
-          <div className="w-16"></div> {/* Spacer */}
+          <h1 className="text-white text-xl font-bold">Secure Payment</h1>
+          <div className="w-44"></div>
         </header>
 
-        <main className="p-4">
+        <main className="p-4 md:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Kolom Kiri: Alamat & Metode Pembayaran */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold mb-4 text-black">
-                  Shipping Address
-                </h3>
-                <textarea
-                  placeholder="Enter your full address"
-                  rows="4"
-                  className="w-full p-2 border text-black border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg text-black font-bold mb-4">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-6">
+                <h3 className="text-lg font-bold mb-4 text-white">
                   Payment Method
                 </h3>
-                <div className="space-y-3 text-gray-700">
-                  <label className="flex items-center p-3 border border-gray-200 rounded-md has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+                <div className="space-y-3 text-gray-300">
+                  <label className="flex items-center p-3 border border-gray-600 rounded-md bg-gray-700">
                     <input
                       type="radio"
                       name="payment"
-                      value="credit-card"
-                      checked={paymentMethod === "credit-card"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-3 text-black"
+                      checked={true}
+                      readOnly
+                      className="mr-3 h-4 w-4 text-teal-500 bg-gray-600 border-gray-500 focus:ring-teal-500"
                     />
-                    Credit/Debit Card
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-200 rounded-md has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="paypal"
-                      checked={paymentMethod === "paypal"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-3"
-                    />
-                    PayPal
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-200 rounded-md has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="other"
-                      checked={paymentMethod === "other"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-3"
-                    />
-                    Other (e.g. E-Wallet, Bank Transfer)
+                    E-Wallet, Virtual Account, Credit Card (via Xendit)
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* Kolom Kanan: Ringkasan & Tombol Bayar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                <h3 className="text-lg text-black font-bold mb-4">Order Summary</h3>
-                <div className="space-y-2 text-gray-700">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg p-6 sticky top-24">
+                <h3 className="text-xl text-white font-bold mb-4">
+                  Order Summary
+                </h3>
+                <div className="space-y-3 text-gray-300">
                   <div className="flex justify-between">
-                    <span>Item(s)</span>
+                    <span>Subtotal</span>
                     <span>Rp {subtotal.toLocaleString("id-ID")}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>Rp {shipping.toLocaleString("id-ID")}</span>
+                    <span>Tax (11%)</span>
+                    <span>
+                      Rp {tax.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
+                    </span>
                   </div>
-                  <div className="border-t my-2"></div>
-                  <div className="flex justify-between font-bold text-xl">
+                  <div className="border-t border-gray-700 my-2"></div>
+                  <div className="flex justify-between font-bold text-xl text-white">
                     <span>Total</span>
-                    <span>Rp {total.toLocaleString("id-ID")}</span>
+                    <span className="text-teal-400">
+                      Rp {total.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
+                    </span>
                   </div>
                 </div>
                 <button
                   onClick={handleConfirmAndPay}
-                  className="w-full mt-6 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-semibold"
+                  disabled={isLoading || cartItems.length === 0}
+                  className="w-full mt-6 px-4 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition font-semibold text-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
                 >
-                  Confirm & Pay
+                  {isLoading ? "Processing..." : "Confirm & Pay"}
                 </button>
               </div>
             </div>

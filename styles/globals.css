@@ -1,26 +1,38 @@
-@import "tailwindcss";
+@import "tailwindcss"; 
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Variabel ini dipertahankan jika Anda menggunakannya untuk elemen lain. */
+  /* Foreground dark akan kita pakai untuk warna teks default. */
+  --background-light: #ffffff;
+  --foreground-light: #171717;
+  --background-dark: #0a0a0a;
+  --foreground-dark: #ededed;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Aturan @media untuk dark mode tidak lagi diperlukan untuk 'body' 
+  karena background sekarang permanen menggunakan gradient gelap.
+*/
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Menggunakan gradient yang Anda minta dari contoh sebelumnya */
+  background-color: #000000; /* Warna fallback jika gradient tidak termuat */
+  background-image: linear-gradient(to top, #0B2834, #000000);
+
+  /* Menggunakan variabel warna teks dari dark mode Anda agar serasi */
+  color: var(--foreground-dark);
+}
+
+/* Custom Swiper Styles */
+.swiper-pagination-bullet {
+  background-color: #9ca3af; /* Warna default (abu-abu) */
+  opacity: 0.8;
+  transition: background-color 0.3s;
+}
+
+.swiper-pagination-bullet-active {
+  /* Warna untuk titik yang aktif (teal) */
+  background-color: #14b8a6 !important;
 }

@@ -5,7 +5,7 @@ export const dummyProducts = [
     category: "Drinks",
     price: 5000,
     description: "Fresh and pure mountain spring water.",
-    image: "/images/aqua.png", // Diperbarui
+    image: "/images/aqua.png", 
   },
   {
     id: 2,
