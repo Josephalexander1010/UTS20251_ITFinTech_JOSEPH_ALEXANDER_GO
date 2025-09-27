@@ -1,38 +1,62 @@
-@import "tailwindcss"; 
+@import "tailwindcss";
 /* @tailwind base; */
 /* @tailwind components; */
 /* @tailwind utilities; */
 
 :root {
-  /* Variabel ini dipertahankan jika Anda menggunakannya untuk elemen lain. */
-  /* Foreground dark akan kita pakai untuk warna teks default. */
   --background-light: #ffffff;
   --foreground-light: #171717;
   --background-dark: #0a0a0a;
   --foreground-dark: #ededed;
 }
 
-/* Aturan @media untuk dark mode tidak lagi diperlukan untuk 'body' 
-  karena background sekarang permanen menggunakan gradient gelap.
-*/
-
 body {
-  /* Menggunakan gradient yang Anda minta dari contoh sebelumnya */
-  background-color: #000000; /* Warna fallback jika gradient tidak termuat */
+  background-color: #000000;
   background-image: linear-gradient(to top, #0B2834, #000000);
-
-  /* Menggunakan variabel warna teks dari dark mode Anda agar serasi */
   color: var(--foreground-dark);
 }
 
 /* Custom Swiper Styles */
 .swiper-pagination-bullet {
-  background-color: #9ca3af; /* Warna default (abu-abu) */
+  background-color: #9ca3af;
   opacity: 0.8;
   transition: background-color 0.3s;
 }
 
 .swiper-pagination-bullet-active {
-  /* Warna untuk titik yang aktif (teal) */
   background-color: #14b8a6 !important;
+}
+
+/* --- STYLE BARU UNTUK ANIMASI MODAL --- */
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cart-modal-overlay {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.cart-modal {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Styling untuk scrollbar di dalam modal (opsional, tapi membuat lebih bagus) */
+.cart-items-list::-webkit-scrollbar {
+  width: 6px;
+}
+.cart-items-list::-webkit-scrollbar-track {
+  background: #e2e8f0; /* bg-gray-200 */
+}
+.cart-items-list::-webkit-scrollbar-thumb {
+  background: #94a3b8; /* bg-gray-400 */
+  border-radius: 3px;
+}
+.cart-items-list::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* bg-gray-500 */
 }

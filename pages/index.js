@@ -27,8 +27,10 @@ export default function Home() {
   const [products] = useState(dummyProducts);
   const [filter, setFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const { addToCart, cartItems } = useCart();
+  const { addToCart, cartItems, removeFromCart, updateQuantity } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false); // State untuk pop-up cart
+  const [flyingItems, setFlyingItems] = useState([]); // State untuk animasi flying items
 
   // --- PERUBAHAN 2: Definisikan gambar untuk carousel ---
   const carouselImages = [
@@ -58,8 +60,65 @@ export default function Home() {
     0
   );
 
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + (item.price * item.quantity),
+    0
+  );
+
+  // Function untuk close cart popup ketika klik di luar
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setIsCartOpen(false);
+    }
+  };
+
+  // Function untuk animasi flying to cart
+  const handleAddToCart = (product, event) => {
+    // Ambil posisi tombol yang diklik
+    const button = event.currentTarget;
+    const buttonRect = button.getBoundingClientRect();
+    
+    // Ambil posisi cart icon
+    const cartIcon = document.querySelector('[aria-label="cart"]');
+    const cartRect = cartIcon.getBoundingClientRect();
+    
+    // Buat flying item
+    const flyingItem = {
+      id: Date.now() + Math.random(),
+      image: product.image,
+      startX: buttonRect.left + buttonRect.width / 2,
+      startY: buttonRect.top + buttonRect.height / 2,
+      endX: cartRect.left + cartRect.width / 2,
+      endY: cartRect.top + cartRect.height / 2,
+    };
+    
+    setFlyingItems(prev => [...prev, flyingItem]);
+    
+    // Hapus flying item setelah animasi selesai
+    setTimeout(() => {
+      setFlyingItems(prev => prev.filter(item => item.id !== flyingItem.id));
+      addToCart(product);
+    }, 800);
+  };
+
   return (
     <div className={`${geistSans.className} ${geistMono.className} font-sans min-h-screen`}>
+      <style jsx>{`
+        @keyframes flyToCart {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.3)) scale(0.8);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translate(var(--end-x), var(--end-y)) scale(0.3);
+            opacity: 0;
+          }
+        }
+      `}</style>
       <div className="container mx-auto max-w-full">
         <Head>
           <title>Cinema 22 - Food & Beverages</title>
@@ -80,20 +139,138 @@ export default function Home() {
               />
             </Link>
             <h1 className="text-white text-2xl font-bold font-sans">
-              Cinema 22
+              Cinema 22 Cafe
             </h1>
           </div>
-          <Link href="/checkout" className="text-2xl relative">
+          
+          {/* Cart Icon dengan Pop-up */}
+          <button 
+            onClick={() => setIsCartOpen(!isCartOpen)}
+            className="text-2xl relative hover:scale-110 transition-transform"
+          >
             <span role="img" aria-label="cart" className="text-yellow-400">
               🛒
             </span>
             {totalItemsInCart > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                 {totalItemsInCart}
               </span>
             )}
-          </Link>
+          </button>
         </header>
+
+        {/* Flying Items Animation */}
+        {flyingItems.map((item) => (
+          <div
+            key={item.id}
+            className="fixed z-40 pointer-events-none"
+            style={{
+              left: item.startX - 20,
+              top: item.startY - 20,
+              animation: `flyToCart 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+              '--end-x': `${item.endX - item.startX}px`,
+              '--end-y': `${item.endY - item.startY}px`,
+            }}
+          >
+            <div className="w-10 h-10 rounded-lg overflow-hidden shadow-lg animate-pulse">
+              <Image
+                src={item.image}
+                alt="Flying item"
+                width={40}
+                height={40}
+                objectFit="cover"
+              />
+            </div>
+          </div>
+        ))}
+
+        {/* Cart Pop-up Overlay */}
+        {isCartOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-30 flex items-start justify-end p-4 pt-20"
+            onClick={handleOverlayClick}
+          >
+            <div className="bg-gray-900 rounded-lg shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden border border-gray-700">
+              {/* Header Pop-up */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-700">
+                <h2 className="text-xl font-bold text-white">Shopping Cart</h2>
+                <button 
+                  onClick={() => setIsCartOpen(false)}
+                  className="text-gray-400 hover:text-white text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+              
+              {/* Cart Items */}
+              <div className="flex-1 overflow-y-auto max-h-96">
+                {cartItems.length === 0 ? (
+                  <div className="p-8 text-center text-gray-400">
+                    <div className="text-6xl mb-4">🛒</div>
+                    <p>Your cart is empty</p>
+                  </div>
+                ) : (
+                  <div className="p-4 space-y-4">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-3">
+                        <div className="relative w-16 h-16 flex-shrink-0">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-lg"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white font-medium truncate">{item.name}</h4>
+                          <p className="text-teal-400 text-sm font-bold">
+                            Rp {item.price.toLocaleString("id-ID")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="w-8 h-8 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors flex items-center justify-center"
+                          >
+                            -
+                          </button>
+                          <span className="text-white min-w-[1.5rem] text-center">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-8 h-8 rounded-full bg-teal-600 text-white hover:bg-teal-500 transition-colors flex items-center justify-center"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Footer Pop-up */}
+              {cartItems.length > 0 && (
+                <div className="border-t border-gray-700 p-4 space-y-4">
+                  <div className="flex justify-between items-center text-white">
+                    <span className="text-lg font-bold">Total:</span>
+                    <span className="text-xl font-bold text-teal-400">
+                      Rp {totalPrice.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                  <Link href="/checkout">
+                    <button 
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-500 transition-colors"
+                    >
+                      Checkout ({totalItemsInCart} items)
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <main className="p-4 pt-24">
           <div className="relative flex items-center mb-8">
@@ -190,8 +367,8 @@ export default function Home() {
                     {product.description}
                   </p>
                   <button
-                    onClick={() => addToCart(product)}
-                    className="w-full mt-auto px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition"
+                    onClick={(e) => handleAddToCart(product, e)}
+                    className="w-full mt-auto px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-400 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
                   >
                     Add +
                   </button>
