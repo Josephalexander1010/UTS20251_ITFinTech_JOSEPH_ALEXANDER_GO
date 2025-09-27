@@ -78,8 +78,14 @@ export default function Home() {
     const button = event.currentTarget;
     const buttonRect = button.getBoundingClientRect();
     
-    // Ambil posisi cart icon
+    // Ambil posisi cart icon dengan lebih spesifik
     const cartIcon = document.querySelector('[aria-label="cart"]');
+    if (!cartIcon) {
+      // Fallback jika cart icon tidak ditemukan
+      addToCart(product);
+      return;
+    }
+    
     const cartRect = cartIcon.getBoundingClientRect();
     
     // Buat flying item
@@ -92,9 +98,12 @@ export default function Home() {
       endY: cartRect.top + cartRect.height / 2,
     };
     
+    // Debug log
+    console.log('Flying item created:', flyingItem);
+    
     setFlyingItems(prev => [...prev, flyingItem]);
     
-    // Hapus flying item setelah animasi selesai
+    // Hapus flying item setelah animasi selesai dan tambahkan ke cart
     setTimeout(() => {
       setFlyingItems(prev => prev.filter(item => item.id !== flyingItem.id));
       addToCart(product);
@@ -103,7 +112,7 @@ export default function Home() {
 
   return (
     <div className={`${geistSans.className} ${geistMono.className} font-sans min-h-screen`}>
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes flyToCart {
           0% {
             transform: translate(0, 0) scale(1);
@@ -117,6 +126,10 @@ export default function Home() {
             transform: translate(var(--end-x), var(--end-y)) scale(0.3);
             opacity: 0;
           }
+        }
+        
+        .fly-to-cart-animation {
+          animation: flyToCart 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
       `}</style>
       <div className="container mx-auto max-w-full">
@@ -163,22 +176,21 @@ export default function Home() {
         {flyingItems.map((item) => (
           <div
             key={item.id}
-            className="fixed z-40 pointer-events-none"
+            className="fixed z-50 pointer-events-none fly-to-cart-animation"
             style={{
-              left: item.startX - 20,
-              top: item.startY - 20,
-              animation: `flyToCart 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+              left: `${item.startX - 20}px`,
+              top: `${item.startY - 20}px`,
               '--end-x': `${item.endX - item.startX}px`,
               '--end-y': `${item.endY - item.startY}px`,
             }}
           >
-            <div className="w-10 h-10 rounded-lg overflow-hidden shadow-lg animate-pulse">
+            <div className="w-10 h-10 rounded-lg overflow-hidden shadow-2xl border-2 border-teal-400 bg-white">
               <Image
                 src={item.image}
                 alt="Flying item"
                 width={40}
                 height={40}
-                objectFit="cover"
+                className="w-full h-full object-cover"
               />
             </div>
           </div>

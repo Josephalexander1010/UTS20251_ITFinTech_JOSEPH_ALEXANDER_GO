@@ -1,7 +1,6 @@
-// pages/api/create-invoice.js
 import axios from 'axios';
 import dbConnect from '../../lib/mongodb';
-import Order from '../../models/Order'; // Pastikan file models/Order.js sudah ada
+import Order from '../../models/Order';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -10,6 +9,7 @@ export default async function handler(req, res) {
         const { items, totalAmount } = req.body;
         const external_id = `cinema22-order-${Date.now()}`;
 
+        // Simpan order ke database dengan status PENDING
         const newOrder = new Order({
             external_id: external_id,
             amount: totalAmount,
@@ -18,11 +18,15 @@ export default async function handler(req, res) {
         });
         await newOrder.save();
 
+        // Siapkan data yang akan dikirim ke Xendit
         const invoiceData = {
             external_id: external_id,
             amount: totalAmount,
             payer_email: 'customer@example.com',
             description: 'Pembayaran F&B Cinema 22',
+            // --- PERUBAHAN UTAMA ADA DI SINI ---
+            // Memberitahu Xendit ke mana harus mengarahkan pengguna setelah pembayaran sukses.
+            success_redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success`,
         };
 
         try {
@@ -37,12 +41,15 @@ export default async function handler(req, res) {
                 }
             );
 
+            // Simpan invoice ID dari Xendit untuk referensi
             newOrder.invoice_id = response.data.id;
             await newOrder.save();
 
+            // Kirim URL pembayaran ke frontend
             res.status(200).json({ invoice_url: response.data.invoice_url });
+
         } catch (error) {
-            console.error('Error Xendit:', error.response ? error.response.data : error.message);
+            console.error('Error creating Xendit invoice:', error.response ? error.response.data : error.message);
             res.status(500).json({ message: 'Gagal membuat invoice Xendit' });
         }
     } else {
@@ -50,3 +57,4 @@ export default async function handler(req, res) {
         res.status(405).end('Method Not Allowed');
     }
 }
+
