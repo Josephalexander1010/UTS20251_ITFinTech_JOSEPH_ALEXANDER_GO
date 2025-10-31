@@ -1,18 +1,18 @@
-// pages/payment.js
-
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
 export default function PaymentPage() {
-  const { cartItems } = useCart();
+  // --- AMBIL isCartLoaded UNTUK MENCEGAH HYDRATION ERROR ---
+  const { cartItems, isCartLoaded } = useCart();
   const [isLoading, setIsLoading] = useState(false);
 
-  const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+  // --- HITUNG TOTAL HANYA JIKA KERANJANG SUDAH SIAP ---
+  const subtotal = isCartLoaded ? cartItems.reduce(
+    (total, item) => total + Number(item.price) * Number(item.quantity),
     0
-  );
+  ) : 0;
   const tax = subtotal * 0.11;
   const total = subtotal + tax;
 
@@ -28,24 +28,31 @@ export default function PaymentPage() {
       items: cartItems.map((item) => ({
         productId: item._id || item.id,
         name: item.name,
-        quantity: item.quantity,
-        price: item.price,
+        quantity: Number(item.quantity), // Pastikan ini adalah Angka
+        price: Number(item.price),       // Pastikan ini adalah Angka
       })),
       totalAmount: Math.round(total),
     };
 
     try {
-      const response = await fetch("/api/create-invoice", {
+      // --- INI PERBAIKAN FINALNYA ---
+      // Kita gunakan URL lengkap (Absolute Path)
+      const apiUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/create-invoice`;
+      
+      const response = await fetch(apiUrl, {
+      // --- AKHIR PERBAIKAN ---
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(orderDetails),
+        credentials: 'include', // <-- KUNCI TETAP DI SINI
       });
 
       const result = await response.json();
 
       if (response.ok) {
+        setIsLoading(false); // Matikan loading SEBELUM pindah
         window.location.href = result.invoice_url;
       } else {
         alert(`Error: ${result.message}`);
@@ -103,32 +110,39 @@ export default function PaymentPage() {
                 <h3 className="text-xl text-white font-bold mb-4">
                   Order Summary
                 </h3>
-                <div className="space-y-3 text-gray-300">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>Rp {subtotal.toLocaleString("id-ID")}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (11%)</span>
-                    <span>
-                      Rp {tax.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                  <div className="border-t border-gray-700 my-2"></div>
-                  <div className="flex justify-between font-bold text-xl text-white">
-                    <span>Total</span>
-                    <span className="text-teal-400">
-                      Rp {total.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleConfirmAndPay}
-                  disabled={isLoading || cartItems.length === 0}
-                  className="w-full mt-6 px-4 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition font-semibold text-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Processing..." : "Confirm & Pay"}
-                </button>
+                {/* --- TAMBAHKAN PENGECEKAN isCartLoaded --- */}
+                {!isCartLoaded ? (
+                  <div className="text-gray-300 text-center">Loading summary...</div>
+                ) : (
+                  <>
+                    <div className="space-y-3 text-gray-300">
+                      <div className="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>Rp {subtotal.toLocaleString("id-ID")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax (11%)</span>
+                        <span>
+                          Rp {tax.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                      <div className="border-t border-gray-700 my-2"></div>
+                      <div className="flex justify-between font-bold text-xl text-white">
+                        <span>Total</span>
+                        <span className="text-teal-400">
+                          Rp {total.toLocaleString("id-ID", { minimumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleConfirmAndPay}
+                      disabled={isLoading || cartItems.length === 0}
+                      className="w-full mt-6 px-4 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition font-semibold text-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? "Processing..." : "Confirm & Pay"}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -137,3 +151,4 @@ export default function PaymentPage() {
     </div>
   );
 }
+

@@ -1,18 +1,36 @@
-// models/Order.js
 import mongoose from 'mongoose';
 
+// Ini adalah asumsi struktur file Order.js kamu
+// Sesuaikan jika ada yang beda, TAPI PASTIKAN TAMBAH 'userPhoneNumber'
+
 const OrderSchema = new mongoose.Schema({
-    external_id: { type: String, required: true, unique: true }, // ID dari sisi kita
-    invoice_id: { type: String }, // ID dari Xendit
-    status: { type: String, default: 'PENDING' }, // PENDING, PAID, FAILED
-    amount: { type: Number, required: true },
-    items: [{ // Menyimpan detail produk yang dibeli
-        productId: String,
-        name: String,
-        quantity: Number,
-        price: Number
-    }],
-    createdAt: { type: Date, default: Date.now }
-});
+    external_id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    invoice_id: {
+        type: String,
+    },
+    // Kamu pakai 'total' di file create-invoice.js, jadi saya pakai 'total'
+    total: {
+        type: Number,
+        required: true,
+    },
+    status: {
+        type: String,
+        default: 'PENDING',
+    },
+    items: {
+        type: Array,
+    },
+    
+    // --- TAMBAHKAN BARIS INI ---
+    userPhoneNumber: {
+        type: String,
+    },
+    // --- AKHIR TAMBAHAN ---
+
+}, { timestamps: true });
 
 export default mongoose.models.Order || mongoose.model('Order', OrderSchema);
